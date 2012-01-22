@@ -3,8 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     
-    <com.acm.dijkstrasden.AnimationView
-      android:id="@+id/aview"
+    <com.acm.dijkstrasden.GameView  android:id="@+id/aview"
       android:layout_width="match_parent"
       android:layout_height="match_parent"/>
 

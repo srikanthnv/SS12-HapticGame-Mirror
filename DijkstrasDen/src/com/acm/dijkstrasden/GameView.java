@@ -1,0 +1,332 @@
+package com.acm.dijkstrasden;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+
+import android.util.AttributeSet;
+import android.util.Log;
+
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
+import android.os.Vibrator;
+
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
+import android.os.PowerManager;
+
+class GameView extends SurfaceView implements SurfaceHolder.Callback,
+		SensorEventListener {
+
+	Player playerObj = new Player(new int[2], OrientationEnum.ORIENT_EAST,
+			OrientationEnum.ORIENT_EAST);
+
+	private Levels levelsObj = new Levels(0, 2, new String[2]);
+
+	Notification notificationObj = new Notification(getContext(), new long[] { 0, 100, 50, 100, 50, 100 },
+			new long[] { 0, 30, 30, 40 }, new long[] { 0, 50, 100, 50, 50, 50, 50, 50, 50, 100 }, NotifyTypeEnum.NOTIFY_NONE);
+	
+	private boolean tSInputAvail;
+	
+	private SensorManager mSensorManager;
+	private Sensor mSensor;
+	private PowerManager pm;
+	private PowerManager.WakeLock wakeLock;
+
+	/** The thread that actually draws the animation */
+	private AnimationThread thread;
+
+	public GameView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+
+		// register our interest in hearing about changes to our surface
+		SurfaceHolder holder = getHolder();
+		holder.addCallback(this);
+
+		notificationObj.mVibrator = (Vibrator) getContext().getSystemService(
+				Context.VIBRATOR_SERVICE);
+
+		pm = (PowerManager) getContext()
+				.getSystemService(Context.POWER_SERVICE);
+		wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
+				"My wakelook");
+		
+		// This will make the screen and power stay on
+		// This will release the wakelook after 1000 ms
+		wakeLock.acquire();
+
+		// Get an instance of the SensorManager
+		mSensorManager = (SensorManager) getContext().getSystemService(
+				Context.SENSOR_SERVICE);
+		mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+		mSensorManager.registerListener(this, mSensor,
+				SensorManager.SENSOR_DELAY_FASTEST);
+
+		// set up levels
+		levelsObj.setup_levels(this);
+
+		levelsObj.readMaze(playerObj, levelsObj.currlevel);
+
+		// create thread only; it's started in surfaceCreated()
+		thread = new AnimationThread(holder);
+
+	}
+
+	public void onAccuracyChanged(Sensor arg0, int arg1) {
+		// Do Nothing for now
+	}
+
+	public void onSensorChanged(SensorEvent event) {
+		float x_ang = event.values[0];
+
+		if (x_ang > 160 && x_ang < 200)
+			playerObj.sensorOrientation = OrientationEnum.ORIENT_NORTH;
+		else if (x_ang > 250 && x_ang < 290)
+			playerObj.sensorOrientation = OrientationEnum.ORIENT_EAST;
+		else if (x_ang > 340 || x_ang < 20)
+			playerObj.sensorOrientation = OrientationEnum.ORIENT_SOUTH;
+		else if (x_ang > 70 && x_ang < 110)
+			playerObj.sensorOrientation = OrientationEnum.ORIENT_WEST;
+	}
+
+	class AnimationThread extends Thread {
+
+		/* Are we running ? */
+		private boolean mRun;
+
+		/* Handle to the surface manager object we interact with */
+		private SurfaceHolder mSurfaceHolder;
+
+		Paint paint = new Paint();
+
+		public AnimationThread(SurfaceHolder surfaceHolder) {
+			mSurfaceHolder = surfaceHolder;
+			tSInputAvail = false;
+		}
+
+		/**
+		 * The actual game loop
+		 */
+		@Override
+		public void run() {
+			while (mRun) {
+				Canvas c = null;
+				try {
+					c = mSurfaceHolder.lockCanvas(null);
+					synchronized (mSurfaceHolder) {
+						calcState();
+						playerObj.updatePlayerPosition();
+						notificationObj.giveFeedback();
+						updateUI(c);
+					}
+				} finally {
+					if (c != null) {
+						mSurfaceHolder.unlockCanvasAndPost(c);
+					}
+				}
+			}
+		}
+
+		private void updateUI(Canvas canvas) {
+			canvas.drawColor(Color.BLACK);
+
+			/*
+			 * Clear the background
+			 */
+			paint.setColor(Color.WHITE);
+			paint.setAntiAlias(true);
+
+			/*
+			 * Draw nodes
+			 */
+			for (int i = 0; i < levelsObj.num_nodes; i++)
+				canvas.drawCircle(levelsObj.PositionArray[i][0], levelsObj.PositionArray[i][1], 10,
+						paint);
+
+			/*
+			 * Draw links
+			 */
+			for (int i = 0; i < levelsObj.num_nodes; i++)
+				for (int j = 0; j < levelsObj.num_nodes; j++)
+					if (levelsObj.LinkArray[i][j] == 1) {
+						canvas.drawLine(levelsObj.PositionArray[i][0],
+								levelsObj.PositionArray[i][1], levelsObj.PositionArray[j][0],
+								levelsObj.PositionArray[j][1], paint);
+					}
+
+			/*
+			 * Draw player character
+			 */
+			paint.setColor(Color.YELLOW);
+			canvas.drawCircle(levelsObj.PositionArray[levelsObj.dest_node][0],
+					levelsObj.PositionArray[levelsObj.dest_node][1], 10, paint);
+
+			paint.setColor(Color.GREEN);
+			canvas.drawCircle(playerObj.playerPosition[0], playerObj.playerPosition[1], 10, paint);
+			int or_x = playerObj.playerPosition[0];
+			int or_y = playerObj.playerPosition[1];
+			switch (playerObj.playerOrientation) {
+			case ORIENT_NORTH:
+				or_y -= 10;
+				break;
+			case ORIENT_SOUTH:
+				or_y += 10;
+				break;
+			case ORIENT_EAST:
+				or_x += 10;
+				break;
+			case ORIENT_WEST:
+				or_x -= 10;
+				break;
+			}
+			paint.setColor(Color.RED);
+			canvas.drawCircle(or_x, or_y, 5, paint);
+		}
+
+		/*
+		 * Update the state of the game
+		 */
+		private void calcState() {
+
+			switch (playerObj.playerState) {
+			case STATE_RUNNING:
+				for (int i = 0; i < levelsObj.num_nodes; i++) {
+					if (playerObj.playerPosition[0] == levelsObj.PositionArray[i][0]
+							&& playerObj.playerPosition[1] == levelsObj.PositionArray[i][1]) {
+
+						playerObj.playerNode = i;
+						if (playerObj.playerNode == levelsObj.dest_node) {
+							playerObj.playerState = PlayerStateEnum.STATE_LEVELDONE;
+							notificationObj.do_notify = NotifyTypeEnum.NOTIFY_LEVELDONE;
+						} else {
+							playerObj.playerState = PlayerStateEnum.STATE_IDLE;
+							notificationObj.do_notify = NotifyTypeEnum.NOTIFY_ATNODE;
+						}
+
+						break;
+					}
+				}
+				break;
+			case STATE_IDLE:
+				// Check if we received a command to move
+				if (tSInputAvail == true) {
+					tSInputAvail = false;
+					// if we did, then ensure we are on a path between two nodes
+					if (levelsObj.OrientationArray[playerObj.playerNode][playerObj.playerOrientation
+							.ordinal()] == true) {
+						playerObj.playerState = PlayerStateEnum.STATE_RUNNING;
+						notificationObj.do_notify = NotifyTypeEnum.NOTIFY_MOVE;
+					} else {
+						notificationObj.do_notify = NotifyTypeEnum.NOTIFY_BUMP;
+					}
+
+				}
+				if (playerObj.sensorOrientation != playerObj.playerOrientation) {
+					playerObj.playerOrientation = playerObj.sensorOrientation;
+					notificationObj.do_notify = NotifyTypeEnum.NOTIFY_ORIENT;
+				}
+				break;
+			case STATE_LEVELDONE:
+				// Check if we received a command to move to the next level
+				if (tSInputAvail == true) {
+					tSInputAvail = false;
+					levelsObj.currlevel++;
+					if (levelsObj.currlevel >= levelsObj.numlevels) {
+						// Game over!
+						break;
+					}
+					/*
+					 * Load the next level map into memory.
+					 */
+					levelsObj.readMaze(playerObj, levelsObj.currlevel);
+					playerObj.playerState = PlayerStateEnum.STATE_IDLE;
+				}
+				if (playerObj.sensorOrientation != playerObj.playerOrientation) {
+					playerObj.playerOrientation = playerObj.sensorOrientation;
+					notificationObj.do_notify = NotifyTypeEnum.NOTIFY_ORIENT;
+				}
+				break;
+
+			}
+		}
+
+		/*
+		 * So we can stop/pause the game loop
+		 */
+		public void setRunning(boolean b) {
+			mRun = b;
+		}
+	}
+
+	/*
+	 * Obligatory method to implement SurfaceHolder.Callback
+	 */
+
+	/* Callback invoked when the surface dimensions change. */
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height) {
+	}
+
+	/*
+	 * Callback invoked when the Surface has been created and is ready to be
+	 * used.
+	 */
+	public void surfaceCreated(SurfaceHolder holder) {
+		thread.setRunning(true);
+		thread.start();
+	}
+
+	/*
+	 * Callback invoked when the Surface has been destroyed and must no longer
+	 * be tSInputAvail. WARNING: after this method returns, the Surface/Canvas must
+	 * never be tSInputAvail again!
+	 */
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		// we have to tell thread to shut down & wait for it to finish, or else
+		// it might touch the Surface after we return and explode
+		boolean retry = true;
+		thread.setRunning(false);
+		while (retry) {
+			try {
+				thread.join();
+				retry = false;
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
+	/*
+	 * Called when a touchscreen event is detected
+	 * @see android.view.View#onTouchEvent(android.view.MotionEvent)
+	 */
+	public boolean onTouchEvent(MotionEvent event) {
+
+		/*
+		 * Ignore everything except touch down action
+		 */
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			tSInputAvail = true;
+			Log.d("Game", "Touch event called");
+			break;
+		}
+		
+		/*
+		 * Debounce touch-down.
+		 */
+
+		try {
+			Thread.sleep(16);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+
+}
