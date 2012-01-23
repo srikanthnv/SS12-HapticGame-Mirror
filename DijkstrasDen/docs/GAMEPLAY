@@ -1,0 +1,47 @@
++------------------+
+|  Dijkstra's Den  |
++------------------+
+
+Welcome to Dijkstra's Den! 
+
+You are NodeMan a peculiar character stuck  on the orthogonal world 
+that is Dijkstra's Den.
+
+The Den consists of a series of levels. In each level, a grid of nodes 
+is laid out a 2-dimensional plane. You start on a fixed node, and 
+your goal is to get to the other end of the plane where there's a 
+special exit node waiting for you.
+
+Wait! It's not that simple. There are no roads in Dijkstra's Den, 
+just nodes and links between nodes. All these links are perpendicular,
+meaning you have to turn 90 degrees to get from one to the other.
+
+Your goal is to run across these links and nodes as fast as possible and 
+get to the exit node.
+
+Finish all the levels and you can escape from Dijkstra's Den!
+
+
+Controls:
+--------
+
+Once the game starts you start at one node, and you are placed there 
+facing the next node. Hold your phone sideways (i.d. landscape mode)
+
+*Touch - Press anywhere on the touchscreen to walk in the direction that 
+          you are facing. The character will walk till it hits the next node
+          and stop
+
+*Move  - Continue to hold the phone sideways and twist 90 degrees in any 
+          direction to face in the new direction. 
+       
+*New level - Complete a level and press anywhere on the touchscreen to load 
+              the next level.
+       
+Feedback:
+--------
+* Node hit  - A short vibration and a "pop"
+* Walking   - Footsteps
+* Turning   - Two short vibrations and a "swish"
+* Level 
+   complete - Three short vibrations followed by a long vibration and a chime
