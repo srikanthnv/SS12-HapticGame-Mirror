@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import android.speech.tts.TextToSpeech;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -22,16 +23,18 @@ import android.hardware.SensorManager;
 import android.os.PowerManager;
 
 class GameView extends SurfaceView implements SurfaceHolder.Callback,
-		SensorEventListener {
+		SensorEventListener{
 
+	/** Object representing NodeMan */
 	Player playerObj = new Player(new int[2], OrientationEnum.ORIENT_EAST,
 			OrientationEnum.ORIENT_EAST);
 
+	/** Object controlling levels layouts etc */
 	private Levels levelsObj = new Levels(0, 2, new String[2]);
 
-	Notification notificationObj = new Notification(getContext(), new long[] { 0, 100, 50, 100, 50, 100 },
-			new long[] { 0, 30, 30, 40 }, new long[] { 0, 50, 100, 50, 50, 50, 50, 50, 50, 100 }, NotifyTypeEnum.NOTIFY_NONE);
-	
+	/** Object controlling notifications (vibrate, sound, etc) */
+	Notification notificationObj = new Notification(getContext());
+
 	private boolean tSInputAvail;
 	
 	private SensorManager mSensorManager;
@@ -42,13 +45,19 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 	/** The thread that actually draws the animation */
 	private AnimationThread thread;
 
+	private TextToSpeech mTts;
+	private static final int MY_DATA_CHECK_CODE = 1234;
+	
+	private long levelStartTimeMs;
+
+	
 	public GameView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		// register our interest in hearing about changes to our surface
 		SurfaceHolder holder = getHolder();
 		holder.addCallback(this);
-
+		
 		notificationObj.mVibrator = (Vibrator) getContext().getSystemService(
 				Context.VIBRATOR_SERVICE);
 
@@ -72,6 +81,7 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 		levelsObj.setup_levels(this);
 
 		levelsObj.readMaze(playerObj, levelsObj.currlevel);
+		levelStartTimeMs = System.currentTimeMillis();
 
 		// create thread only; it's started in surfaceCreated()
 		thread = new AnimationThread(holder);
@@ -202,6 +212,7 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 
 						playerObj.playerNode = i;
 						if (playerObj.playerNode == levelsObj.dest_node) {
+							notificationObj.sayScore((System.currentTimeMillis() - levelStartTimeMs)/1000);							
 							playerObj.playerState = PlayerStateEnum.STATE_LEVELDONE;
 							notificationObj.do_notify = NotifyTypeEnum.NOTIFY_LEVELDONE;
 						} else {
@@ -237,6 +248,7 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 				if (tSInputAvail == true) {
 					tSInputAvail = false;
 					levelsObj.currlevel++;
+					
 					if (levelsObj.currlevel >= levelsObj.numlevels) {
 						// Game over!
 						break;
