@@ -23,13 +23,15 @@ public class Notification implements TextToSpeech.OnInitListener {
 	public int sMove;
 	public int stopMove;
 	public int sLevel;
+	public int sGameDone;
+	public int sLevelStart;
 	
 	/** Notify types */
 	public NotifyTypeEnum do_notify = NotifyTypeEnum.NOTIFY_NONE;
 	
 	/** TTS types */
 	private TextToSpeech mTts;
-	private static final int MY_DATA_CHECK_CODE = 1234;
+	//private static final int MY_DATA_CHECK_CODE = 1234;
 	
 	Context myContext;
 
@@ -42,6 +44,8 @@ public class Notification implements TextToSpeech.OnInitListener {
 		sOrient = sounds.load(context, R.raw.orient, 1);
 		sMove = sounds.load(context, R.raw.move, 1);
 		sLevel = sounds.load(context, R.raw.level, 1);
+		sGameDone = sounds.load(context, R.raw.gamedone, 1);
+		sLevelStart = sounds.load(context, R.raw.levelstart, 1);
 	
         // Fire off an intent to check if a TTS engine is installed
         Intent checkIntent = new Intent();
@@ -76,6 +80,16 @@ public class Notification implements TextToSpeech.OnInitListener {
 
 	private void notifyEvent(NotifyTypeEnum type) {
 		switch (type) {
+		case NOTIFY_LEVELSTART:
+			mVibrator.vibrate(vib_pattern_atnode, -1);
+			sounds.play(sLevelStart, 1.0f, 1.0f, 0, 0, 1.0f);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			break;
+			
 		case NOTIFY_BUMP:
 			mVibrator.vibrate(vib_pattern_bump, -1);
 			sounds.play(sBump, 1.0f, 1.0f, 0, 0, 1.0f);
@@ -113,13 +127,33 @@ public class Notification implements TextToSpeech.OnInitListener {
 		case NOTIFY_MOVE:
 			stopMove = sounds.play(sMove, 1.0f, 1.0f, 0, -1, 1.0f);
 			break;
-
+		case NOTIFY_STOPSOUND:
+			sounds.stop(stopMove);
+			break;
+		case NOTIFY_GAMEDONE:
+			Log.d("Game", "Game done");
+			sounds.stop(stopMove);
+			mVibrator.vibrate(vib_pattern_leveldone, -1);
+			sounds.play(sGameDone, 1.0f, 1.0f, 0, 0, 1.0f);
+			try {
+				Thread.sleep(400);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			break;
 		}
 	}
-    /**
-     * Executed when a new TTS is instantiated. Some static text is spoken via TTS here.
-     * @param i
-     */
-    public void onInit(int i) {
-    }	
+	
+	protected void pause() {
+		notifyEvent(NotifyTypeEnum.NOTIFY_STOPSOUND);
+	    //Close the Text to Speech Library
+	    if(mTts != null) {
+	        mTts.stop();
+	        mTts.shutdown();
+	    }
+	}
+
+	public void onInit(int arg0) {		
+	}
+	
 }

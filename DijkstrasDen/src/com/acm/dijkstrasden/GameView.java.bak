@@ -1,13 +1,9 @@
 package com.acm.dijkstrasden;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import 	android.graphics.drawable.Drawable;
 
 import android.speech.tts.TextToSpeech;
 import android.util.AttributeSet;
@@ -80,24 +76,17 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 				SensorManager.SENSOR_DELAY_FASTEST);
 
 		// set up levels
-		
-		///Set up game levels
 		if(0 == MyProperties.getInstance().levelType) {
-			levelsObj = new Levels(0, 3);
-			levelsObj.setup_levels_game();
+			levelsObj = new Levels(0, 2);
+			levelsObj.setup_levels(this);
 			levelsObj.readMaze(playerObj, 0);
-			
 		}
-		//Set up tutorial levels
 		else {
 			levelsObj = new Levels(0, 2);
-			levelsObj.setup_levels_tutorial();
-			levelsObj.readMaze(playerObj, 0);
+			levelsObj.setup_levels(this);
+			levelsObj.readMaze(playerObj, 1);
 		}
-		
 		levelStartTimeMs = System.currentTimeMillis();
-		notificationObj.do_notify = NotifyTypeEnum.NOTIFY_LEVELSTART;
-		notificationObj.giveFeedback();
 
 		// create thread only; it's started in surfaceCreated()
 		thread = new AnimationThread(holder);
@@ -116,22 +105,14 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 	public void onSensorChanged(SensorEvent event) {
 		float x_ang = event.values[0];
 
-		if (x_ang > 170 && x_ang < 190) {
+		if (x_ang > 160 && x_ang < 200)
 			playerObj.sensorOrientation = OrientationEnum.ORIENT_NORTH;
-			//Log.d("Game", "" + x_ang);
-		}
-		else if (x_ang > 260 && x_ang < 280) {
+		else if (x_ang > 250 && x_ang < 290)
 			playerObj.sensorOrientation = OrientationEnum.ORIENT_EAST;
-			//Log.d("Game", "" + x_ang);
-		}
-		else if (x_ang > 350 || x_ang < 10) {
+		else if (x_ang > 340 || x_ang < 20)
 			playerObj.sensorOrientation = OrientationEnum.ORIENT_SOUTH;
-			//Log.d("Game", "" + x_ang);
-		}
-		else if (x_ang > 80 && x_ang < 100){
+		else if (x_ang > 70 && x_ang < 110)
 			playerObj.sensorOrientation = OrientationEnum.ORIENT_WEST;
-			//Log.d("Game", "" + x_ang);
-		}
 	}
 
 	class AnimationThread extends Thread {
@@ -143,30 +124,10 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 		private SurfaceHolder mSurfaceHolder;
 
 		Paint paint = new Paint();
-		Bitmap rotated0;
-		Bitmap rotated90;
-		Bitmap rotated180;
-		Bitmap rotated270;
-		Bitmap bmp;
 
 		public AnimationThread(SurfaceHolder surfaceHolder) {
 			mSurfaceHolder = surfaceHolder;
 			tSInputAvail = false;
-			
-		    Matrix matrix = new Matrix();
-		    
-		    rotated0 = BitmapFactory.decodeResource(getResources(), R.drawable.arrow);
-		    
-		    matrix.reset();
-		    matrix.postRotate(90);
-		    rotated90 = Bitmap.createBitmap(rotated0, 0, 0, rotated0.getWidth(), rotated0.getHeight(), matrix, true);
-		    matrix.reset();
-		    matrix.postRotate(180);
-		    rotated180 = Bitmap.createBitmap(rotated0, 0, 0, rotated0.getWidth(), rotated0.getHeight(), matrix, true);
-		    matrix.reset();
-		    matrix.postRotate(270);
-		    rotated270 = Bitmap.createBitmap(rotated0, 0, 0, rotated0.getWidth(), rotated0.getHeight(), matrix, true);
-			
 		}
 
 		/**
@@ -204,17 +165,9 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 			/*
 			 * Draw nodes
 			 */
-			for (int i = 0; i < levelsObj.num_nodes; i++) {
-				paint.setColor(Color.RED);
-				paint.setAntiAlias(true);
+			for (int i = 0; i < levelsObj.num_nodes; i++)
 				canvas.drawCircle(levelsObj.PositionArray[i][0],
-						levelsObj.PositionArray[i][1], 26, paint);
-				
-				paint.setColor(Color.WHITE);
-				paint.setAntiAlias(true);
-				canvas.drawCircle(levelsObj.PositionArray[i][0],
-						levelsObj.PositionArray[i][1], 24, paint);
-			}
+						levelsObj.PositionArray[i][1], 10, paint);
 
 			/*
 			 * Draw links
@@ -222,8 +175,6 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 			for (int i = 0; i < levelsObj.num_nodes; i++)
 				for (int j = 0; j < levelsObj.num_nodes; j++)
 					if (levelsObj.LinkArray[i][j] == 1) {
-						
-						paint.setStrokeWidth(16);
 						canvas.drawLine(levelsObj.PositionArray[i][0],
 								levelsObj.PositionArray[i][1],
 								levelsObj.PositionArray[j][0],
@@ -231,38 +182,33 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 					}
 
 			/*
-			 * Draw destination
-			 */
-			paint.setColor(Color.RED);
-			canvas.drawCircle(levelsObj.PositionArray[levelsObj.dest_node][0],
-					levelsObj.PositionArray[levelsObj.dest_node][1], 26, paint);
-			
-			paint.setColor(Color.YELLOW);
-			canvas.drawCircle(levelsObj.PositionArray[levelsObj.dest_node][0],
-					levelsObj.PositionArray[levelsObj.dest_node][1], 24, paint);
-
-			/*
 			 * Draw player character
 			 */
-			/*canvas.drawCircle(playerObj.playerPosition[0],
-					playerObj.playerPosition[1], 10, paint);*/
+			paint.setColor(Color.YELLOW);
+			canvas.drawCircle(levelsObj.PositionArray[levelsObj.dest_node][0],
+					levelsObj.PositionArray[levelsObj.dest_node][1], 10, paint);
+
+			paint.setColor(Color.GREEN);
+			canvas.drawCircle(playerObj.playerPosition[0],
+					playerObj.playerPosition[1], 10, paint);
+			int or_x = playerObj.playerPosition[0];
+			int or_y = playerObj.playerPosition[1];
 			switch (playerObj.playerOrientation) {
 			case ORIENT_NORTH:
-				bmp = rotated0;
+				or_y -= 10;
 				break;
 			case ORIENT_SOUTH:
-				bmp = rotated180;
+				or_y += 10;
 				break;
 			case ORIENT_EAST:
-				bmp = rotated90;
+				or_x += 10;
 				break;
 			case ORIENT_WEST:
-				bmp = rotated270;
+				or_x -= 10;
 				break;
 			}
-			
-	        //canvas.drawColor(Color.BLACK);
-	        canvas.drawBitmap(bmp, playerObj.playerPosition[0] - bmp.getWidth()/2, playerObj.playerPosition[1] - bmp.getHeight()/2, null);
+			paint.setColor(Color.RED);
+			canvas.drawCircle(or_x, or_y, 5, paint);
 		}
 
 		/*
@@ -318,13 +264,11 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 
 					if (levelsObj.currlevel >= levelsObj.numlevels) {
 						// Game over!
-						notificationObj.do_notify = NotifyTypeEnum.NOTIFY_GAMEDONE;
 						break;
 					}
 					/*
 					 * Load the next level map into memory.
 					 */
-					notificationObj.do_notify = NotifyTypeEnum.NOTIFY_LEVELSTART;
 					levelsObj.readMaze(playerObj, levelsObj.currlevel);
 					playerObj.playerState = PlayerStateEnum.STATE_IDLE;
 				}

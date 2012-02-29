@@ -3,4 +3,5 @@
     <string name="app_name">DijkstrasDen</string>  
     
 	<string name="empty_text"></string>
+	<string name="enable_ui">Enable GUI</string>
 </resources>

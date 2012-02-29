@@ -15,10 +15,10 @@ public class Levels {
 	public int numlevels;
 	public String[] level;
 
-	public Levels(int currlevel, int numlevels, String[] level) {
+	public Levels(int currlevel, int numlevels) {
 		this.currlevel = currlevel;
 		this.numlevels = numlevels;
-		this.level = level;
+		level = new String[numlevels];
 	}
 
 	void readMaze(Player playerObj, int mylevel) {
@@ -115,20 +115,90 @@ public class Levels {
 	
 		// Log.i("readMaze", "Exiting.");
 	}
-
-	void setup_levels(GameView animationView) {
-		level[0] = "Numnodes 5 " + "Node 0 20 100 " + "Node 1 100 100 "
-				+ "Node 2 100 20 " + "Node 3 100 200 " + "Node 4 200 20 "
-				+ "NumLinks 4 " + "Link 0 1 " + "Link 1 2 " + "Link 1 3 "
-				+ "Link 2 4 " + "Player 0 " + "Destination 4 ";
 	
-		level[1] = "Numnodes 10 " + "Node 0 80 240 " + "Node 1 160 240 "
-				+ "Node 2 160 160 " + "Node 3 160 80 " + "Node 4 320 80 "
-				+ "Node 5 320 160 " + "Node 6 320 240 " + "Node 7 320 320 "
-				+ "Node 8 400 240 " + "Node 9 400 160 " + "NumLinks 12 "
-				+ "Link 0 1 " + "Link 1 2 " + "Link 1 6 " + "Link 2 3 "
-				+ "Link 2 5 " + "Link 3 4 " + "Link 4 5 " + "Link 5 6 "
-				+ "Link 5 9 " + "Link 6 8 " + "Link 6 7 " + "Link 8 9 "
-				+ "Player 0 " + "Destination 9 ";
+	void setup_levels_tutorial() {
+		level[0] = "Numnodes 2 " + 
+				"Node 0 50 200 " + 
+				"Node 1 200 200 " + 
+				
+				"NumLinks 1 " + 
+				"Link 0 1 " +
+				"Player 0 " + 
+				"Destination 1 ";
+	
+		level[1] = "Numnodes 3 " + 
+				"Node 0 50 200 " + 
+				"Node 1 200 200 " + 
+				"Node 1 200 50 " + 
+				
+				"NumLinks 2 " + 
+				"Link 0 1 " +
+				"Link 1 2 " +
+				"Player 0 " + 
+				"Destination 2 ";
+	
+	}	
+
+	void setup_levels_game() {
+		level[0] = "Numnodes 5 " + 
+				"Node 0 50 200 " + 
+				"Node 1 200 200 " + 
+				"Node 2 200 50 " + 
+				"Node 3 200 350 " + 
+				"Node 4 350 50 " + 
+				
+				"NumLinks 4 " + 
+				"Link 0 1 " + 
+				"Link 1 2 " + 
+				"Link 1 3 " + 
+				"Link 2 4 " + 
+				"Player 0 " + 
+				"Destination 4 ";
+	
+		level[1] = "Numnodes 6 " + 
+				"Node 0 50 200 " + 
+				"Node 1 200 200 " + 
+				"Node 2 350 200 " + 
+				"Node 3 200 350 " + 
+				"Node 4 350 350 " + 
+				"Node 5 500 350 " + 
+
+				"NumLinks 6 " + 
+				"Link 0 1 " + 
+				"Link 1 2 " + 
+				"Link 1 3 " + 
+				"Link 2 4 " + 
+				"Link 3 4 " + 
+				"Link 4 5 " + 
+
+				"Player 0 " + "Destination 5 ";
+
+		level[2] = "Numnodes 10 " + 
+				"Node 0 80 240 " + 
+				"Node 1 160 240 " + 
+				"Node 2 160 160 " + 
+				"Node 3 160 80 " + 
+				"Node 4 320 80 " + 
+				"Node 5 320 160 " + 
+				"Node 6 320 240 " + 
+				"Node 7 320 320 " + 
+				"Node 8 400 240 " + 
+				"Node 9 400 160 " + 
+				
+				"NumLinks 12 " + 
+				"Link 0 1 " + 
+				"Link 1 2 " + 
+				"Link 1 6 " + 
+				"Link 2 3 " + 
+				"Link 2 5 " + 
+				"Link 3 4 " + 
+				"Link 4 5 " + 
+				"Link 5 6 " + 
+				"Link 5 9 " + 
+				"Link 6 8 " + 
+				"Link 6 7 " + 
+				"Link 8 9 " + 
+				
+				"Player 0 " + "Destination 9 ";
 	}
 }
