@@ -17,6 +17,7 @@ public class Notification implements TextToSpeech.OnInitListener {
 	public long[] vib_pattern_bump = new long[] { 0, 100, 50, 100, 50, 100 };
 	public long[] vib_pattern_atnode = new long[] { 0, 30, 30, 40 };
 	public long[] vib_pattern_leveldone = new long[] { 0, 50, 100, 50, 50, 50, 50, 50, 50, 100 };
+	public long[] vib_pattern_orient = new long[] { 0, 30, 30, 40 };
 		
 	/** Sound variables */
 	public SoundPool sounds;
@@ -127,6 +128,8 @@ public class Notification implements TextToSpeech.OnInitListener {
 			break;
 		case NOTIFY_ORIENT:
 			sounds.play(sOrient, 1.0f, 1.0f, 0, 0, 1.0f);
+			mVibrator.vibrate(vib_pattern_orient, -1);
+			
 			break;
 		case NOTIFY_MOVE:
 			stopMove = sounds.play(sMove, 1.0f, 1.0f, 0, -1, 1.0f);
