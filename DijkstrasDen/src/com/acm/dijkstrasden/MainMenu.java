@@ -13,6 +13,18 @@ import android.view.ViewGroup;
 import android.view.GestureDetector;
 
 
+/**
+ * Activity for the first menu visible when the game is launched. 
+ * The main menu allows users to choose either a tutorial or to 
+ * actually play the game. 
+ * 
+ * The menu does not rely on absolute touch locations. Instead it 
+ * uses swipe gestures to figure out the user's choices.
+ * 
+ * BLV users are also aided by the TTS - the main menu "speaks" 
+ * instructions when it is launched. Users can repeat instructions by long-press
+ * on the main menu.
+ */
 public class MainMenu extends Activity 
                       implements GestureDetector.OnGestureListener,
                                  GestureDetector.OnDoubleTapListener,
@@ -27,8 +39,10 @@ public class MainMenu extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        /**
+         * Uses Vibrator to indicate command registration
+         */
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        //setContentView(R.layout.mainmenu);
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         
         gesturedetector = new GestureDetector(this, this);
@@ -71,6 +85,9 @@ public class MainMenu extends Activity
 	private static final int low_move_thresh = 300;
 	private static final int high_move_thresh = 800;
 
+	/**
+	 * Handles the swipe gesture movements needed to navigate the menu
+	 */
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
 		Log.d("Gesture", "onFling " + velocityX + "," + velocityY);
@@ -101,6 +118,9 @@ public class MainMenu extends Activity
 		return false;
 	}
 
+	/**
+	 * Speak instructions on demand
+	 */
 	public void onLongPress(MotionEvent e) {
 		giveInstructions();
 		
@@ -121,6 +141,8 @@ public class MainMenu extends Activity
 		//Log.d("Gesture", "onSingleTapUp");
 		return false;
 	}
+	
+	
 	void giveInstructions() {
 		mTts.speak("Welcome to Dykstra's Den!",
                 TextToSpeech.QUEUE_FLUSH,  null);		
@@ -136,6 +158,9 @@ public class MainMenu extends Activity
                 TextToSpeech.QUEUE_ADD,  null);		
 	}
 
+	/**
+	 * Speak instructions on startup
+	 */
 	public void onInit(int status) {
 		giveInstructions();
 		

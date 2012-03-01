@@ -4,6 +4,10 @@ import java.util.Scanner;
 
 import android.util.Log;
 
+/**
+ * Handle all levels needed for tutorial, game, etc.
+ * 
+ */
 public class Levels {
 	public int num_nodes;
 	public int num_links;
@@ -14,13 +18,25 @@ public class Levels {
 	public int currlevel;
 	public int numlevels;
 	public String[] level;
-
+	
+	/**
+	 * Initialize the levels for this instance of the game
+	 * @param currlevel - level to start on.
+	 * @param numlevels - Total number of levels
+	 */
 	public Levels(int currlevel, int numlevels) {
 		this.currlevel = currlevel;
 		this.numlevels = numlevels;
 		level = new String[numlevels];
 	}
 
+	/**
+	 * Read a single level from the super-mega-awesome "level" syntax for this game, and initialize
+	 * everything accordingly. 
+	 * 
+	 * @param playerObj - A reference to the actual player object, for initialization
+	 * @param mylevel - The "number" of the level to read.
+	 */
 	void readMaze(Player playerObj, int mylevel) {
 		// int index;
 		Scanner scanner = new Scanner(level[mylevel]).useDelimiter(" ");
@@ -116,6 +132,9 @@ public class Levels {
 		// Log.i("readMaze", "Exiting.");
 	}
 	
+	/**
+	 * Setup the levels object to play the tutorial
+	 */
 	void setup_levels_tutorial() {
 		level[0] = "Numnodes 2 " + 
 				"Node 0 50 200 " + 
@@ -139,6 +158,9 @@ public class Levels {
 	
 	}	
 
+	/**
+	 * Setup the levels object to play the game
+	 */
 	void setup_levels_game() {
 		level[0] = "Numnodes 5 " + 
 				"Node 0 50 200 " + 

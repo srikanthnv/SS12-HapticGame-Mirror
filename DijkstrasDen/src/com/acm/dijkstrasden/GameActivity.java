@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.media.AudioManager;
 import android.os.Bundle;
 
+/**
+ * Activity for the game itself - creates a GameView for playing the game. 
+ */
 public class GameActivity extends Activity {
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);

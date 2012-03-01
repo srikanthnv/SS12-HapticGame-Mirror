@@ -1,5 +1,6 @@
 package com.acm.dijkstrasden;
 
+/** User notification types */
 public enum NotifyTypeEnum {
 	NOTIFY_LEVELSTART,
 	NOTIFY_BUMP, 

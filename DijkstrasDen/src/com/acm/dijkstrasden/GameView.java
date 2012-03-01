@@ -7,26 +7,22 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import 	android.graphics.drawable.Drawable;
-
-import android.speech.tts.TextToSpeech;
 import android.util.AttributeSet;
 import android.util.Log;
-
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
 import android.os.Vibrator;
-
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-
 import android.os.PowerManager;
 
-class GameView extends SurfaceView implements SurfaceHolder.Callback,
+/**
+ * Primary game loop - implements a Surface onto which the game is rendered.  
+ */
+public class GameView extends SurfaceView implements SurfaceHolder.Callback,
 		SensorEventListener {
 
 	/** Object representing NodeMan */
@@ -46,14 +42,13 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 	/** The thread that actually draws the animation */
 	private AnimationThread thread;
 
-	//private TextToSpeech mTts;
-	//private static final int MY_DATA_CHECK_CODE = 1234;
-
-	private long levelStartTimeMs;
-
 	/** Object controlling levels layouts etc */
 	private Levels levelsObj;
 	
+	/** Time at which level was started */
+	private long levelStartTimeMs;
+	
+	/** Setup and start the game */
 	public GameView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
@@ -108,11 +103,13 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 		// Do Nothing for now
 	}
 	
+	/** Set the game to pause when screen is removed. Called from Activity */
 	public void pause() {
 		wakeLock.release();
 		notificationObj.pause();
 	}
 
+	/** Handle sensor change and set orientation */
 	public void onSensorChanged(SensorEvent event) {
 		float x_ang = event.values[0];
 
@@ -134,6 +131,7 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 		}
 	}
 
+	/** Class to handle the animations being drawn on screen */
 	class AnimationThread extends Thread {
 
 		/* Are we running ? */
@@ -149,6 +147,7 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 		Bitmap rotated270;
 		Bitmap bmp;
 
+		/** Animation thread constructor precreates bitmaps for later use */
 		public AnimationThread(SurfaceHolder surfaceHolder) {
 			mSurfaceHolder = surfaceHolder;
 			tSInputAvail = false;
@@ -192,6 +191,7 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 			}
 		}
 
+		/** Draw the map on screen */
 		private void updateUI(Canvas canvas) {
 			canvas.drawColor(Color.BLACK);
 
@@ -265,8 +265,8 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 	        canvas.drawBitmap(bmp, playerObj.playerPosition[0] - bmp.getWidth()/2, playerObj.playerPosition[1] - bmp.getHeight()/2, null);
 		}
 
-		/*
-		 * Update the state of the game
+		/**
+		 * Update the state of the game - collision detection, level change notification, etc
 		 */
 		private void calcState() {
 
@@ -337,8 +337,8 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 			}
 		}
 
-		/*
-		 * So we can stop/pause the game loop
+		/**
+		 * stop/pause the game loop - unused.
 		 */
 		public void setRunning(boolean b) {
 			mRun = b;
@@ -382,7 +382,7 @@ class GameView extends SurfaceView implements SurfaceHolder.Callback,
 		}
 	}
 
-	/*
+	/**
 	 * Called when a touchscreen event is detected
 	 * 
 	 * @see android.view.View#onTouchEvent(android.view.MotionEvent)

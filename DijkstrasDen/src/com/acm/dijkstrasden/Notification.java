@@ -9,6 +9,9 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 
+/**
+ * Handles all user notifications of all sorts.
+ */
 public class Notification implements TextToSpeech.OnInitListener {
 	public Vibrator mVibrator;
 	public long[] vib_pattern_bump = new long[] { 0, 100, 50, 100, 50, 100 };
@@ -35,8 +38,8 @@ public class Notification implements TextToSpeech.OnInitListener {
 	
 	Context myContext;
 
+	/** Initialize notification types, wav files, etc */
 	public Notification(Context context) {
-
 		// Set up sounds
 		sounds = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
 		sBump = sounds.load(context, R.raw.bump, 1);
@@ -54,7 +57,6 @@ public class Notification implements TextToSpeech.OnInitListener {
         myContext=context;
         
         Log.d("Game", "Starting TTS act");
-        //((Activity)context).startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
         
         // create the TTS instance
         mTts = new TextToSpeech(myContext, this);
@@ -71,6 +73,7 @@ public class Notification implements TextToSpeech.OnInitListener {
 		}
 	}
 	
+	/** Speak the score at the end of the level */
 	public void sayScore(long l) {
 		Log.d("Game", "sayScore");
 		mTts.speak("You finished this level in " + l + " seconds!",
@@ -78,7 +81,8 @@ public class Notification implements TextToSpeech.OnInitListener {
                 null);
 	}
 
-	private void notifyEvent(NotifyTypeEnum type) {
+	/** Generate a specific notification */
+	public void notifyEvent(NotifyTypeEnum type) {
 		switch (type) {
 		case NOTIFY_LEVELSTART:
 			mVibrator.vibrate(vib_pattern_atnode, -1);
@@ -144,6 +148,7 @@ public class Notification implements TextToSpeech.OnInitListener {
 		}
 	}
 	
+	/** Handle the UI being paused */
 	protected void pause() {
 		notifyEvent(NotifyTypeEnum.NOTIFY_STOPSOUND);
 	    //Close the Text to Speech Library

@@ -2,19 +2,19 @@ package com.acm.dijkstrasden;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.GestureDetector.OnDoubleTapListener;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.GestureDetector;
 import android.view.View;
 import android.view.WindowManager;
 
+/**
+ * Implements the swipe gestures used on the home screen. 
+ */
 public class TouchView extends View implements GestureDetector.OnGestureListener {
     private Drawable mGfx;    
     private GestureDetector gestureDetector;
